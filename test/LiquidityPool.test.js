@@ -111,7 +111,17 @@ contract('LiquidityPool', ([owner, investor]) => {
 
         	// check Governance Token Balance of investor after withdrawal
             result = await governanceToken.balanceOf(investor)
-            assert.equal(result.toString(), tokens('100'), 'investor governance Token balance correct after issuance')
+            assert.equal(result.toString(), tokens('10'), 'investor governance Token balance correct after issuance')
+        })
+
+        it('subtracts fee from withdrawal before timelock expires', async () => {
+            // stake mock dai
+            await underlyingToken.approve(liquidityPool.address, tokens('100'), {from: investor})
+            await liquidityPool.lockedDeposit(tokens('100'), {from: investor})
+            // withdraw mock dai
+            await liquidityPool.lockedWithdraw(tokens('100'), {from: investor})
+            result = await underlyingToken.balanceOf(investor)
+            assert.equal(result.toString(), tokens('50'), 'fee substracted from investor  staked amount')
         })
     })
 
