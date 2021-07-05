@@ -4,13 +4,13 @@ import './UnderlyingToken.sol';
 import './LpToken.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import '@openzeppelin/contracts/access/Ownable.sol';
 
 
 
-contract LiquidityPool is LpToken {
+contract LiquidityPool is LpToken, Ownable {
 	using SafeMath for uint;
 
-	mapping(address => uint) public checkpoints;
 	UnderlyingToken public underlyingToken;
 	IERC20 public thothToken;
 	// uint constant public REWARD_PER_BLOCK = 1;
@@ -25,6 +25,7 @@ contract LiquidityPool is LpToken {
 
 
 	address[] public stakers;
+	mapping(address => uint) public checkpoints;
     mapping(address => uint) public stakingBalance;
     mapping(address => uint) public lockedStakingBalance;
     mapping(address => bool) public hasStaked;
@@ -38,7 +39,7 @@ contract LiquidityPool is LpToken {
 	constructor(address _underlyingToken, address _governanceToken) {
 		underlyingToken = UnderlyingToken(_underlyingToken);
 		thothToken = IERC20(_governanceToken);
-		end = block.timestamp + duration;
+		end = block.timestamp.add(duration);
 	}
 
 
@@ -76,7 +77,7 @@ contract LiquidityPool is LpToken {
 		underlyingToken.transferFrom(msg.sender, address(this), amount);
 
 		// update staking balance
-        lockedStakingBalance[msg.sender] = lockedStakingBalance[msg.sender] + amount;
+        lockedStakingBalance[msg.sender] = lockedStakingBalance[msg.sender].add(amount);
 
 		_mint(msg.sender, amount);
 
