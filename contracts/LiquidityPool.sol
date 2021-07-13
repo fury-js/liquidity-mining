@@ -32,6 +32,11 @@ contract LiquidityPool is LpToken, Ownable {
     mapping(address => bool) public isStaking;
     mapping(address => mapping(address => uint256)) public tokens;
 
+    // Events
+
+    event Deposit (address user, uint amount, uint balance);
+    event Withdraw (address user, uint amount, uint balance);
+
 
 
 
@@ -66,6 +71,8 @@ contract LiquidityPool is LpToken, Ownable {
         // update staking staus
         hasStaked[msg.sender] = true;
         isStaking[msg.sender] = true;
+
+        emit Deposit (msg.sender, amount, thothToken.balanceOf(msg.sender));
 	}
 
 	function lockedDeposit(uint amount) external {
@@ -90,6 +97,8 @@ contract LiquidityPool is LpToken, Ownable {
         hasStaked[msg.sender] = true;
         isStaking[msg.sender] = true;
 
+        emit Deposit (msg.sender, amount, thothToken.balanceOf(msg.sender));
+
 	}
 
 	function withdraw(uint amount) external {
@@ -109,6 +118,7 @@ contract LiquidityPool is LpToken, Ownable {
 		_distributeRewards(msg.sender);
 		underlyingToken.transfer(msg.sender, amount);
 		_burn(msg.sender, amount);
+		emit Withdraw (msg.sender, amount, thothToken.balanceOf(msg.sender));
 
 	}
 
@@ -133,6 +143,7 @@ contract LiquidityPool is LpToken, Ownable {
 		underlyingToken.transfer(msg.sender, amount.sub(_feeAmount));
 		underlyingToken.transfer(address(this), _feeAmount);
 		_burn(msg.sender, amount);
+		emit Withdraw (msg.sender, amount, thothToken.balanceOf(msg.sender));
 
 	}
 
@@ -153,6 +164,7 @@ contract LiquidityPool is LpToken, Ownable {
 			_distributeRewardsForlockedStaking(msg.sender);
 			underlyingToken.transfer(msg.sender, amount);
 			_burn(msg.sender, amount);
+			emit Withdraw (msg.sender, amount, thothToken.balanceOf(msg.sender));
 		} 
 		else {
 			_withdrawBeforeTimelockexpires(amount);
